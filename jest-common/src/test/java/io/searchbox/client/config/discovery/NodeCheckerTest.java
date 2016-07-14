@@ -1,12 +1,22 @@
 package io.searchbox.client.config.discovery;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+
 import io.searchbox.action.Action;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.client.config.ClientConfig;
 import io.searchbox.client.config.exception.CouldNotConnectException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,14 +26,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 public class NodeCheckerTest {
 
@@ -320,4 +322,12 @@ public class NodeCheckerTest {
         assertEquals("http://localhost:9200", serversItr.next());
     }
 
+  @Test
+  public void testUnavailableInitialNode() throws Exception {
+    NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
+
+    when(jestClient.execute(isA(Action.class))).thenThrow(new CouldNotConnectException(
+        "http://192.168.2.8:9200", new IOException("Test HttpHostException")));
+    nodeChecker.runOneIteration();
+  }
 }

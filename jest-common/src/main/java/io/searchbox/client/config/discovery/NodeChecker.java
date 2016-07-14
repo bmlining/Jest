@@ -1,6 +1,7 @@
 package io.searchbox.client.config.discovery;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -57,6 +58,7 @@ public class NodeChecker extends AbstractScheduledService {
                 clientConfig.getDiscoveryFrequencyTimeUnit()
         );
 		this.bootstrapServerList = ImmutableSet.copyOf(clientConfig.getServerList());
+    this.discoveredServerList = Sets.newLinkedHashSet(bootstrapServerList);
     }
 
     @Override
@@ -77,7 +79,7 @@ public class NodeChecker extends AbstractScheduledService {
             return;
             // do not elevate the exception since that will stop the scheduled calls.
             // throw new RuntimeException("Error executing NodesInfo!", e);
-        }  
+        }
 
         if (result.isSucceeded()) {
             LinkedHashSet<String> httpHosts = new LinkedHashSet<String>();
